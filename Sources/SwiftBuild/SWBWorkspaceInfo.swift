@@ -23,12 +23,13 @@ public struct SWBTargetInfo: Sendable {
     public let guid: String
     public let targetName: String
     public let projectName: String
+    public let dynamicVariantGuid: SWBTargetGUID?
 }
 
 extension SWBWorkspaceInfo {
     init(_ workspaceInfo: WorkspaceInfoResponse.WorkspaceInfo) {
         let targetInfos = workspaceInfo.targetInfos.map {
-            SWBTargetInfo(guid: $0.guid, targetName: $0.targetName, projectName: $0.projectName)
+            SWBTargetInfo(guid: $0.guid, targetName: $0.targetName, projectName: $0.projectName, dynamicVariantGuid: SWBTargetGUID(rawValue: $0.dynamicVariantGuid?.rawValue))
         }
         self.init(
             targetInfos: targetInfos,

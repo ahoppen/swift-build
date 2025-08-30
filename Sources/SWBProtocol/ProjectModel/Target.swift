@@ -18,6 +18,13 @@ public struct TargetGUID: RawRepresentable, Hashable, Sendable, Codable {
     public init(rawValue: String) {
         self.rawValue = rawValue
     }
+
+    public init?(rawValue: String?) {
+        guard let rawValue else {
+            return nil
+        }
+        self.rawValue = rawValue
+    }
 }
 
 public class Target: PolymorphicSerializable, @unchecked Sendable {

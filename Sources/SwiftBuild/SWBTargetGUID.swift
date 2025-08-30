@@ -16,4 +16,11 @@ public struct SWBTargetGUID: RawRepresentable, Hashable, Sendable {
     public init(rawValue: String) {
         self.rawValue = rawValue
     }
+
+    public init?(rawValue: String?) {
+        guard let rawValue else {
+            return nil
+        }
+        self.rawValue = rawValue
+    }
 }

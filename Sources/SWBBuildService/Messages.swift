@@ -458,7 +458,7 @@ private struct WorkspaceInfoMsg: MessageHandler {
         let targetInfos: [WorkspaceInfoResponse.WorkspaceInfo.TargetInfo] = workspaceContext.workspace.projects
             .flatMap { project in
                 return project.targets.map { target in
-                    return .init(guid: target.guid, targetName: target.name, projectName: project.name)
+                    return .init(guid: target.guid, targetName: target.name, projectName: project.name, dynamicVariantGuid: TargetGUID(rawValue: target.dynamicTargetVariantGuid))
                 }
             }
         let workspaceInfo = WorkspaceInfoResponse.WorkspaceInfo(

@@ -1051,11 +1051,13 @@ public struct WorkspaceInfoResponse: Message, Equatable {
             public let guid: String
             public let targetName: String
             public let projectName: String
+            public let dynamicVariantGuid: TargetGUID?
 
-            public init(guid: String, targetName: String, projectName: String) {
+            public init(guid: String, targetName: String, projectName: String, dynamicVariantGuid: TargetGUID?) {
                 self.guid = guid
                 self.targetName = targetName
                 self.projectName = projectName
+                self.dynamicVariantGuid = dynamicVariantGuid
             }
         }
 
