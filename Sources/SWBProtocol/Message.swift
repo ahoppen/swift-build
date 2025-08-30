@@ -1060,9 +1060,11 @@ public struct WorkspaceInfoResponse: Message, Equatable {
         }
 
         public let targetInfos: [TargetInfo]
+        public let buildConfigurations: Set<String>
 
-        public init(targetInfos: [WorkspaceInfoResponse.WorkspaceInfo.TargetInfo]) {
+        public init(targetInfos: [WorkspaceInfoResponse.WorkspaceInfo.TargetInfo], buildConfigurations: Set<String>) {
             self.targetInfos = targetInfos
+            self.buildConfigurations = buildConfigurations
         }
     }
 

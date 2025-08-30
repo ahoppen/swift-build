@@ -455,11 +455,18 @@ private struct WorkspaceInfoMsg: MessageHandler {
             throw MsgParserError.missingWorkspaceContext
         }
 
-        return WorkspaceInfoResponse(sessionHandle: session.UID, workspaceInfo: .init(targetInfos: workspaceContext.workspace.projects.flatMap { project in
-            return project.targets.map { target in
-                return .init(guid: target.guid, targetName: target.name, projectName: project.name)
+        let targetInfos: [WorkspaceInfoResponse.WorkspaceInfo.TargetInfo] = workspaceContext.workspace.projects
+            .flatMap { project in
+                return project.targets.map { target in
+                    return .init(guid: target.guid, targetName: target.name, projectName: project.name)
+                }
             }
-        }))
+        let workspaceInfo = WorkspaceInfoResponse.WorkspaceInfo(
+            targetInfos: targetInfos,
+            buildConfigurations: Set(workspaceContext.workspace.projects.flatMap { $0.buildConfigurations }.map(\.name))
+        )
+
+        return WorkspaceInfoResponse(sessionHandle: session.UID, workspaceInfo: workspaceInfo)
     }
 }
 

@@ -16,6 +16,7 @@ import SWBProtocol
 
 public struct SWBWorkspaceInfo: Sendable {
     public let targetInfos: [SWBTargetInfo]
+    public let buildConfigurations: Set<String>
 }
 
 public struct SWBTargetInfo: Sendable {
@@ -26,6 +27,12 @@ public struct SWBTargetInfo: Sendable {
 
 extension SWBWorkspaceInfo {
     init(_ workspaceInfo: WorkspaceInfoResponse.WorkspaceInfo) {
-        self = .init(targetInfos: workspaceInfo.targetInfos.map { .init(guid: $0.guid, targetName: $0.targetName, projectName: $0.projectName) })
+        let targetInfos = workspaceInfo.targetInfos.map {
+            SWBTargetInfo(guid: $0.guid, targetName: $0.targetName, projectName: $0.projectName)
+        }
+        self.init(
+            targetInfos: targetInfos,
+            buildConfigurations: workspaceInfo.buildConfigurations
+        )
     }
 }
