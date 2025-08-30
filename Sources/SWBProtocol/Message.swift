@@ -1248,6 +1248,7 @@ public struct IPCMessage: Serializable, Sendable {
       + localizationMessageTypes
       + dependencyClosureMessageTypes
       + dependencyGraphMessageTypes
+      + buildDescriptionMessages
 
     /// Reverse name mapping.
     static let messageNameToID: [String: any Message.Type] = {
