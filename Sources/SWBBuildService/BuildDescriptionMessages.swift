@@ -156,18 +156,38 @@ struct BuildDescriptionConfiguredTargetSourcesMsg: MessageHandler {
         }
 
         let indexingInfoInput = TaskGenerateIndexingInfoInput(requestedSourceFile: nil, outputPathOnly: true, enableIndexBuildArena: false)
-        let sourcesItems = message.configuredTargets.map { targetGuid in
-            let target = configuredTargetsByID[ConfiguredTarget.GUID(id: targetGuid.rawValue)]
-            let sourceFiles = buildDescription.taskStore.tasksForTarget(target).flatMap { task in
+        let sourcesItems = message.configuredTargets.map { configuredTargetGuid in
+            let target = configuredTargetsByID[ConfiguredTarget.GUID(id: configuredTargetGuid.rawValue)]
+            let copiedFileDestinationToSource = buildDescription.copiedPathMaps[ConfiguredTarget.GUID(id: configuredTargetGuid.rawValue)]
+            var copiedFilesSourceToDestinations: [Path: Set<Path>] = [:]
+            for (destination, source) in copiedFileDestinationToSource ?? [:] {
+                copiedFilesSourceToDestinations[Path(source), default: []].insert(Path(destination))
+            }
+            var headerFiles = Set(copiedFilesSourceToDestinations.keys)
+            let sourceFileInfos = buildDescription.taskStore.tasksForTarget(target).flatMap { task in
                 task.generateIndexingInfo(input: indexingInfoInput).compactMap { (entry) -> SourceFileInfo? in
+                    // We build this source file, so it can't be a header file. Also ensures that we don't report it
+                    // twice below.
+                    headerFiles.remove(entry.path)
                     return SourceFileInfo(
                         path: entry.path,
                         language: SourceLanguage(entry.indexingInfo.language),
-                        outputPath: entry.indexingInfo.indexOutputFile
+                        kind: .source,
+                        outputPath: entry.indexingInfo.indexOutputFile,
+                        copyDestinations: copiedFilesSourceToDestinations[entry.path, default: []]
                     )
                 }
             }
-            return ConfiguredTargetSourceFilesInfo(configuredTarget: targetGuid, sourceFiles: sourceFiles)
+            let headerFileInfos = headerFiles.map { path in
+                return SourceFileInfo(
+                    path: path,
+                    language: nil,
+                    kind: .header,
+                    outputPath: nil,
+                    copyDestinations: copiedFilesSourceToDestinations[path, default: []]
+                )
+            }
+            return ConfiguredTargetSourceFilesInfo(configuredTarget: configuredTargetGuid, sourceFiles: sourceFileInfos + headerFileInfos)
         }
         return BuildDescriptionConfiguredTargetSourcesResponse(targetSourceFileInfos: sourcesItems)
     }

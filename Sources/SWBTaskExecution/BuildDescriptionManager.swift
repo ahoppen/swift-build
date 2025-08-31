@@ -177,8 +177,8 @@ package final class BuildDescriptionManager: Sendable {
 
         // Compute the default configuration name, platform and root paths per target
         var staleFileRemovalIdentifierPerTarget = [ConfiguredTarget?: String]()
-        var settingsPerTarget = [ConfiguredTarget:Settings]()
-        var rootPathsPerTarget = [ConfiguredTarget:[Path]]()
+        var settingsPerTarget = [ConfiguredTarget: Settings]()
+        var rootPathsPerTarget = [ConfiguredTarget: [Path]]()
         var moduleCachePathsPerTarget = [ConfiguredTarget: [Path]]()
 
         var casValidationInfos: OrderedSet<BuildDescription.CASValidationInfo> = []
@@ -246,7 +246,15 @@ package final class BuildDescriptionManager: Sendable {
         }
 
         // Create the build description.
-        return try await BuildDescription.construct(workspace: buildGraph.workspaceContext.workspace, tasks: plan.tasks, path: path, signature: signature, buildCommand: planRequest.buildRequest.buildCommand, diagnostics: planningDiagnostics, indexingInfo: [], fs: fs, bypassActualTasks: bypassActualTasks, targetsBuildInParallel: buildGraph.targetsBuildInParallel, emitFrontendCommandLines: plan.emitFrontendCommandLines, moduleSessionFilePath: planRequest.workspaceContext.getModuleSessionFilePath(planRequest.buildRequest.parameters), invalidationPaths: plan.invalidationPaths, recursiveSearchPathResults: plan.recursiveSearchPathResults, copiedPathMap: plan.copiedPathMap, rootPathsPerTarget: rootPathsPerTarget, moduleCachePathsPerTarget: moduleCachePathsPerTarget, casValidationInfos: casValidationInfos.elements, staleFileRemovalIdentifierPerTarget: staleFileRemovalIdentifierPerTarget, settingsPerTarget: settingsPerTarget, delegate: delegate, targetDependencies: buildGraph.targetDependenciesByGuid, definingTargetsByModuleName: definingTargetsByModuleName, capturedBuildInfo: capturedBuildInfo, userPreferences: buildGraph.workspaceContext.userPreferences)
+        let copiedPathMaps: [ConfiguredTarget.GUID?: [String: String]] = Dictionary(
+            plan.productPlans.compactMap { productPlan in
+                // We ignore duplicate values because the build graph prohibits multiple tasks from producing the same output
+                // anyways, and a "multiple commands produce" error will be emitted later accordingly.
+                let copiedPathMap = productPlan.taskProducerContext.copiedPathMap().compactMapValues(\.only)
+                return (productPlan.forTarget?.guid, copiedPathMap)
+            }
+        ) { $0.merging($1, uniquingKeysWith: { $1 }) }
+        return try await BuildDescription.construct(workspace: buildGraph.workspaceContext.workspace, tasks: plan.tasks, path: path, signature: signature, buildCommand: planRequest.buildRequest.buildCommand, diagnostics: planningDiagnostics, indexingInfo: [], fs: fs, bypassActualTasks: bypassActualTasks, targetsBuildInParallel: buildGraph.targetsBuildInParallel, emitFrontendCommandLines: plan.emitFrontendCommandLines, moduleSessionFilePath: planRequest.workspaceContext.getModuleSessionFilePath(planRequest.buildRequest.parameters), invalidationPaths: plan.invalidationPaths, recursiveSearchPathResults: plan.recursiveSearchPathResults, copiedPathMaps: copiedPathMaps, rootPathsPerTarget: rootPathsPerTarget, moduleCachePathsPerTarget: moduleCachePathsPerTarget, casValidationInfos: casValidationInfos.elements, staleFileRemovalIdentifierPerTarget: staleFileRemovalIdentifierPerTarget, settingsPerTarget: settingsPerTarget, delegate: delegate, targetDependencies: buildGraph.targetDependenciesByGuid, definingTargetsByModuleName: definingTargetsByModuleName, capturedBuildInfo: capturedBuildInfo, userPreferences: buildGraph.workspaceContext.userPreferences)
     }
 
     /// Encapsulates the two ways `getNewOrCachedBuildDescription` can be called, whether we want to retrieve or create a build description based on a plan or whether we have an explicit build description ID that we want to retrieve and we don't need to create a new one.

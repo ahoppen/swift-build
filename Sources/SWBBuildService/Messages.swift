@@ -671,8 +671,9 @@ private struct GetIndexingHeaderInfoMsg: MessageHandler {
             }
 
             let productName = buildRequestContext.getCachedSettings(target.parameters, target: target.target).globalScope.evaluate(BuiltinMacros.PRODUCT_NAME)
-            let copiedHeaders = Dictionary(uniqueKeysWithValues: allTargetOutputPaths.intersection(buildDescription.copiedPathMap.keys).compactMap { path -> (String, String)? in
-                guard let copiedPath = buildDescription.copiedPathMap[path], ProjectHeaderInfo.headerFileExtensions.contains(Path(copiedPath).fileExtension) else { return nil }
+            let mergedCopiedPathMap = buildDescription.mergedCopiedPathMap
+            let copiedHeaders = Dictionary(uniqueKeysWithValues: allTargetOutputPaths.intersection(mergedCopiedPathMap.keys).compactMap { path -> (String, String)? in
+                guard let copiedPath = mergedCopiedPathMap[path], ProjectHeaderInfo.headerFileExtensions.contains(Path(copiedPath).fileExtension) else { return nil }
                 return (path, copiedPath)
             })
 
@@ -1640,7 +1641,7 @@ package struct ServiceMessageHandlers: ServiceExtension {
         service.registerMessageHandler(ComputeDependencyClosureMsg.self)
         service.registerMessageHandler(ComputeDependencyGraphMsg.self)
         service.registerMessageHandler(DumpBuildDependencyInfoMsg.self)
-        
+
         service.registerMessageHandler(BuildDescriptionConfiguredTargetsMsg.self)
         service.registerMessageHandler(BuildDescriptionConfiguredTargetSourcesMsg.self)
         service.registerMessageHandler(IndexBuildSettingsMsg.self)

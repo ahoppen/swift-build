@@ -122,6 +122,10 @@ public struct BuildDescriptionConfiguredTargetSourcesResponse: Message, Serializ
     public static let name = "BUILD_DESCRIPTION_CONFIGURED_TARGET_SOURCES_RESPONSE"
 
     public struct SourceFileInfo: SerializableCodable, Equatable, Sendable {
+        public enum Kind: SerializableCodable, Equatable, Sendable {
+            case source
+            case header
+        }
 
         /// The path of the source file on disk
         public let path: Path
@@ -130,6 +134,8 @@ public struct BuildDescriptionConfiguredTargetSourcesResponse: Message, Serializ
         ///
         /// `nil` if the language could not be determined due to an error.
         public let language: SourceLanguage?
+
+        public let kind: Kind
 
         /// The output path that is used for indexing, ie. the value of the `-index-unit-output-path` or `-o` option in
         /// the source file's build settings.
@@ -140,10 +146,14 @@ public struct BuildDescriptionConfiguredTargetSourcesResponse: Message, Serializ
         /// May be `nil` if the output path could not be determined due to an error.
         public let indexOutputPath: String?
 
-        public init(path: Path, language: SourceLanguage?, outputPath: String?) {
+        public let copyDestinations: Set<Path>
+
+        public init(path: Path, language: SourceLanguage?, kind: Kind, outputPath: String?, copyDestinations: Set<Path>) {
             self.path = path
             self.language = language
+            self.kind = kind
             self.indexOutputPath = outputPath
+            self.copyDestinations = copyDestinations
         }
     }
 

@@ -170,7 +170,7 @@ fileprivate struct BuildDescriptionConstructionTests: CoreBasedTests {
             try await tester.checkBuildDescription(runDestination: .macOS) { results in
                 results.checkNoDiagnostics()
 
-                #expect(results.buildDescription.copiedPathMap == [
+                #expect(results.buildDescription.mergedCopiedPathMap == [
                     "\(tmpDir.str)/build/Debug/FwkTarget.framework/Versions/A/Headers/Fwk.h": "\(tmpDir.str)/Fwk.h"
                 ])
             }
@@ -245,7 +245,7 @@ fileprivate struct BuildDescriptionConstructionTests: CoreBasedTests {
 
                 // Nothing in the map because there are multiple sources for the same destination path.
                 // The build will have already failed because of this, though.
-                #expect(results.buildDescription.copiedPathMap == [:])
+                #expect(results.buildDescription.mergedCopiedPathMap == [:])
             }
         }
     }
@@ -287,19 +287,19 @@ fileprivate struct BuildDescriptionConstructionTests: CoreBasedTests {
 
             try await tester.checkBuildDescription(runDestination: .macOS) { results in
                 results.checkNoDiagnostics()
-                #expect(results.buildDescription.copiedPathMap == [
+                #expect(results.buildDescription.mergedCopiedPathMap == [
                     "\(tmpDir.str)/build/Debug/Empty.framework/Versions/A/Headers/Test.h": "\(tmpDir.str)/Test.h"
                 ])
             }
 
             try await tester.checkBuildDescription(BuildParameters(action: .build, configuration: "Debug", overrides: ["COPY_HEADERS_UNIFDEF_FLAGS": "-B"]), runDestination: .macOS) { results in
                 results.checkNoDiagnostics()
-                #expect(results.buildDescription.copiedPathMap == [:])
+                #expect(results.buildDescription.mergedCopiedPathMap == [:])
             }
 
             try await tester.checkBuildDescription(BuildParameters(action: .build, configuration: "Debug", overrides: ["GCC_OPTIMIZATION_LEVEL": "1"]), runDestination: .macOS) { results in
                 results.checkNoDiagnostics()
-                #expect(results.buildDescription.copiedPathMap == [:])
+                #expect(results.buildDescription.mergedCopiedPathMap == [:])
             }
         }
     }

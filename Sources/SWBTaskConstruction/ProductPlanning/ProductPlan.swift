@@ -1235,7 +1235,7 @@ package final class ProductPlan
     let targetTaskInfo: TargetTaskInfo?
 
     /// The task producer context for this plan.
-    let taskProducerContext: TaskProducerContext
+    package let taskProducerContext: TaskProducerContext
 
     init(path: Path, taskProducers: [any TaskProducer], forTarget: ConfiguredTarget?, targetTaskInfo: TargetTaskInfo?, taskProducerContext: TaskProducerContext)
     {

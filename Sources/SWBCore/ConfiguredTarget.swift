@@ -79,7 +79,7 @@ public final class ConfiguredTarget: Hashable, CustomStringConvertible, Serializ
         return "<\(type(of: self)) \(string)>"
     }
 
-    public struct GUID: Hashable, Sendable, Comparable, CustomStringConvertible {
+    public struct GUID: Hashable, Sendable, Comparable, CustomStringConvertible, Serializable, Codable {
         public let stringValue: String
 
         public init(id: String) {
@@ -92,6 +92,14 @@ public final class ConfiguredTarget: Hashable, CustomStringConvertible, Serializ
 
         public var description: String {
             stringValue
+        }
+
+        public func serialize(to serializer: some Serializer) {
+            serializer.serialize(stringValue)
+        }
+
+        public init(from deserializer: any Deserializer) throws {
+            stringValue = try deserializer.deserialize()
         }
     }
 

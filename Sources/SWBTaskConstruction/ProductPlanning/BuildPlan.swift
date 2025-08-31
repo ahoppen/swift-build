@@ -71,9 +71,6 @@ package final class BuildPlan: StaleFileRemovalContext {
     /// The list of external paths which contribute to the build plan and will invalidate the build description.
     package let invalidationPaths: [Path]
 
-    /// Map of the files which are copied during the build, used for mapping diagnostics.
-    package let copiedPathMap: [String: String]
-
     /// The list of recursive search path requests used in construction.
     package let recursiveSearchPathResults: [RecursiveSearchPathResolver.CachedResult]
 
@@ -271,12 +268,6 @@ package final class BuildPlan: StaleFileRemovalContext {
             return tasks[0]
         }
 
-        // Collect and merge the copied path map from all task producers.
-        // We ignore duplicate values because the build graph prohibits multiple tasks from producing the same output
-        // anyways, and a "multiple commands produce" error will be emitted later accordingly.
-        let copiedPathMaps = productPlanResultContexts.map { $0.productPlan.taskProducerContext.copiedPathMap() }
-        let copiedPathMap = Dictionary(merging: copiedPathMaps, uniquingKeysWith: { old, new in old.union(new) }).compactMapValues(\.only)
-
         // Store the results.
         self.globalProductPlan = globalProductPlan
         self.workspaceContext = planRequest.workspaceContext
@@ -284,7 +275,6 @@ package final class BuildPlan: StaleFileRemovalContext {
         self.tasks = tasksWithoutDuplicates
         self.invalidationPaths = Array(invalidationPaths.sorted(by: \.str))
         self.recursiveSearchPathResults = globalProductPlan.recursiveSearchPathResolver.allResults
-        self.copiedPathMap = copiedPathMap
         self.emitFrontendCommandLines = productPlanResultContexts.map { $0.productPlan.taskProducerContext.emitFrontendCommandLines }.reduce(false, { $0 || $1 })
     }
 

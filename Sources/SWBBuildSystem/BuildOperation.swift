@@ -290,7 +290,7 @@ package final class BuildOperation: BuildSystemOperation {
         buildOutputDelegate = delegate.buildStarted(self)
 
         // Report the copied path map.
-        delegate.reportPathMap(self, copiedPathMap: buildDescription.copiedPathMap, generatedFilesPathMap: buildOutputMap ?? [String:String]())
+        delegate.reportPathMap(self, copiedPathMap: buildDescription.mergedCopiedPathMap, generatedFilesPathMap: buildOutputMap ?? [String:String]())
 
         // Report the diagnostics from task construction.
         //
@@ -530,7 +530,7 @@ package final class BuildOperation: BuildSystemOperation {
         // Create the low-level build system.
         let adaptor: OperationSystemAdaptor
         let system: BuildSystem
-        
+
         let llbQoS: SWBLLBuild.BuildSystem.QualityOfService?
         switch request.qos {
         case .default: llbQoS = .default

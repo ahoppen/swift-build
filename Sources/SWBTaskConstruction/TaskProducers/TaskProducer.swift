@@ -546,7 +546,7 @@ public class TaskProducerContext: StaleFileRemovalContext, BuildFileResolution
     }
 
     /// Get the map of the files which will be copied.
-    func copiedPathMap() -> [String: Set<String>] {
+    package func copiedPathMap() -> [String: Set<String>] {
         return state.withLock { state in
             assert(state._inDeferredMode)
             return state._copiedPathMap
@@ -1198,7 +1198,7 @@ extension TaskProducerContext: CommandProducer {
     public func lookupPlatformInfo(platform: BuildVersion.Platform) -> (any PlatformInfoProvider)? {
         workspaceContext.core.lookupPlatformInfo(platform: platform)
     }
-    
+
     public var preferredArch: String? {
         return settings.preferredArch
     }
